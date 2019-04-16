@@ -56,6 +56,9 @@ class FlushedFileCollector : public EventListener {
   ~FlushedFileCollector() {}
 
   virtual void OnFlushCompleted(DB* /*db*/, const FlushJobInfo& info) override {
+    if (!info.status.ok()) {
+      return;
+    }
     std::lock_guard<std::mutex> lock(mutex_);
     flushed_files_.push_back(info.file_path);
   }
@@ -102,7 +105,10 @@ public:
   }
 
   virtual void OnFlushCompleted(DB* /* db */,
-      const FlushJobInfo& /* info */) override {
+      const FlushJobInfo& info) override {
+    if (!info.status.ok()) {
+      return;
+    }
     int k = static_cast<int>(CompactionReason::kFlush);
     compaction_completed_[k]++;
   }
