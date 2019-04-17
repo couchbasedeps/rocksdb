@@ -1247,6 +1247,9 @@ class DbStressListener : public EventListener {
   }
 #ifndef ROCKSDB_LITE
   virtual void OnFlushCompleted(DB* /*db*/, const FlushJobInfo& info) override {
+    if (!info.status.ok()) {
+      return;
+    }
     assert(IsValidColumnFamilyName(info.cf_name));
     VerifyFilePath(info.file_path);
     // pretending doing some work here
